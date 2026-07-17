@@ -81,4 +81,77 @@ INSERT INTO Pathology(t_id, t_name, result, date) VALUES
 SELECT * FROM Pathology;
 
 
+-- DDL statements 
+-- Create 
+CREATE TABLE Demo (id INT);
+
+-- Alter
+ALTER TABLE Demo ADD PRIMARY KEY( id); -- adding primary key
+ALTER TABLE Demo DROP PRIMARY KEY; -- dropping primary key
+
+ALTER TABLE Patient ADD address TEXT; -- adding column
+ALTER TABLE Pathology ADD p_id VARCHAR(10); -- adding column
+
+ALTER TABLE Pathology ADD CONSTRAINT fk_patient FOREIGN KEY (p_id) REFERENCES Patient(p_id); -- adding foreign key
+
+ALTER TABLE Patient RENAME COLUMN phone_no TO contact; -- renaming column
+ALTER TABLE Pathology RENAME COLUMN date TO date_of_testing;-- renaming column
+
+ALTER TABLE Patient MODIFY name CHAR(100); -- modifying datatype
+
+-- Drop
+DROP TABLE demo;
+
+-- Constraints
+-- Unique
+ALTER TABLE Pharmacy ADD CONSTRAINT UC_med_name UNIQUE(med_name);
+
+-- Check
+ALTER TABLE Pharmacy ADD CONSTRAINT quancheck CHECK (quantity >= 10);
+
+-- Not Null
+ALTER TABLE Doctor MODIFY degree VARCHAR(50) NOT NULL;
+
+-- DML statements
+-- Insert
+INSERT INTO Patient(p_id, name, dob, email, contact) VALUES
+('1011', "Shardul Pathak", '2013-12-23', 'shardulp@pqr.com', '2366379102');
+SELECT * FROM Patient;
+
+-- Select
+SELECT * FROM Pharmacy WHERE quantity > 50;
+
+-- Delete
+DELETE FROM Patient WHERE p_id = 1010;
+
+-- Update
+UPDATE Patient SET address = 'Bavdhan, Pune' WHERE p_id = 1001;
+UPDATE Patient SET address = 'Bavdhan, Pune' WHERE p_id = 1002;
+UPDATE Patient SET address = 'Bavdhan, Pune' WHERE p_id = 1003;
+UPDATE Patient SET address = 'Bavdhan, Pune' WHERE p_id = 1004;
+UPDATE Patient SET address = 'Warje, Pune' WHERE p_id = 1005;
+UPDATE Patient SET address = 'Mumbai, Maharashtra' WHERE p_id = 1006;
+UPDATE Patient SET address = 'Mumbai, Maharashtra' WHERE p_id = 1007;
+UPDATE Patient SET address = 'Kolhapur, Maharashtra' WHERE p_id = 1008;
+UPDATE Patient SET address = 'Nashik, Maharashtra' WHERE p_id = 1009;
+UPDATE Patient SET address = 'Satara, Maharashtra' WHERE p_id = 1011;
+SELECT * FROM Patient;
+
+-- OR 
+UPDATE Patient
+SET address = CASE p_id
+    WHEN '1001' THEN 'Bavdhan, Pune'
+    WHEN '1002' THEN 'Bavdhan, Pune'
+    WHEN '1003' THEN 'Bavdhan, Pune'
+    WHEN '1004' THEN 'Bavdhan, Pune'
+    WHEN '1005' THEN 'Warje, Pune'
+    WHEN '1006' THEN 'Mumbai, Maharashtra'
+    WHEN '1007' THEN 'Mumbai, Maharashtra'
+    WHEN '1008' THEN 'Kolhapur, Maharashtra'
+    WHEN '1009' THEN 'Nashik, Maharashtra'
+    WHEN '1011' THEN 'Satara, Maharashtra'
+END
+WHERE p_id IN ('1001','1002','1003','1004','1005','1006','1007','1008','1009','1011');
+
+
 
