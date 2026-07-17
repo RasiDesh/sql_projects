@@ -153,5 +153,22 @@ SET address = CASE p_id
 END
 WHERE p_id IN ('1001','1002','1003','1004','1005','1006','1007','1008','1009','1011');
 
+-- Index operations
+-- Create index
+CREATE INDEX idx_name ON Patient(name);
+
+-- Verification: shows 'idx_name' details vertically
+SHOW INDEX FROM Patient \G
+
+-- Create Unique index
+CREATE UNIQUE INDEX idx_doctor_name ON Doctor(name);
+
+-- Verification: shows 'non-unique: 0' indicating it is unique
+SHOW INDEX FROM Doctor \G
+
+-- 3. Drop index
+DROP INDEX idx_doctor_name ON Doctor;
+
+-- Relational operators
 
 
