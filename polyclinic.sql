@@ -1,8 +1,8 @@
--- creating database and initializing 
+-- Creating database and initializing 
 CREATE DATABASE polyclinic;
 USE PolyClinic;
 
--- creating tables
+-- Creating tables
 CREATE TABLE Patient(
 p_id VARCHAR(10) PRIMARY KEY, name VARCHAR(100) NOT NULL,
 dob DATE, email VARCHAR(100) NOT NULL, phone_no VARCHAR(10) );
@@ -20,7 +20,7 @@ CREATE TABLE Pathology(
 t_id VARCHAR(10) PRIMARY KEY, t_name VARCHAR(100) UNIQUE, result TEXT,
 date DATE );
 
--- inserting records in tables 
+-- Inserting records in tables 
 INSERT INTO Patient(p_id, name, dob, email, phone_no) VALUES 
 ('1001', "Rasika Deshpande", '2006-07-27', 'rasikad@pqr.com', '8237827369'),
 ('1002', "Kavita Deshpande", '1980-01-05', 'kavitad@pqr.com', '9552451959'),
@@ -187,6 +187,7 @@ SELECT * FROM Pharmacy WHERE quantity >= 100;
 
 -- 5.Less than equal to
 SELECT * FROM Pharmacy WHERE quantity <= 40;
+-- OR
 SELECT * FROM Pharmacy WHERE quantity <= 80;
 
 -- 6.Not equal to
@@ -239,6 +240,7 @@ SELECT code_no, med_name, quantity,
     END AS quantity_type
 FROM Pharmacy;
 
+-- OR
 SELECT code_no, med_name, price,
    CASE
      WHEN price % 2 = 0 THEN 'Even'
@@ -246,3 +248,181 @@ SELECT code_no, med_name, price,
    END AS price_type
 FROM Pharmacy;
 
+-- Aggregate functions
+-- Sum
+SELECT SUM(price) FROM Pharmacy;
+
+-- Average
+SELECT AVG(price) FROM Pharmacy;
+
+-- Minimum
+SELECT MIN(price) FROM Pharmacy;
+
+-- Maximum
+SELECT MAX(price) FROM Pharmacy;
+
+-- Count
+SELECT COUNT(*) AS total_medicines FROM Pharmacy;
+
+-- Grouping functions
+-- 1.group by
+SELECT specialization, COUNT(*) FROM Doctor GROUP BY specialization;
+
+-- 2. group by and having clause
+SELECT MONTH(date_of_testing) AS test_month, COUNT(*) AS total_tests FROM Pathology GROUP BY MONTH(date_of_testing) HAVING COUNT(*) > 1;
+
+-- Set operations
+-- 1.Union
+SELECT name, specialization
+FROM Doctor
+WHERE specialization LIKE '%Cardiology%'
+UNION
+SELECT name, specialization
+FROM Doctor
+WHERE specialization LIKE '%Gynecology%';
+
+-- 2.Minus/ Except in MySQL
+SELECT name, specialization
+FROM Doctor
+WHERE specialization LIKE '%Dentist%'
+EXCEPT
+SELECT name, specialization
+FROM Doctor
+WHERE specialization LIKE '%Pediatrics%';
+
+-- OR
+SELECT name, specialization
+FROM Doctor
+WHERE specialization LIKE '%Pediatrics%'
+EXCEPT
+SELECT name, specialization
+FROM Doctor
+
+-- IN and NOT IN
+-- 1.IN
+SELECT * FROM Doctor WHERE specialization IN ('Pediatrics', 'Neurology', 'Dentist');
+
+-- 2.NOT IN
+SELECT * FROM Doctor WHERE specialization NOT IN ('Pediatrics', 'Neurology', 'Dentist');
+
+-- Complex queries(Subqueries)
+-- Patients younger than the average DOB
+SELECT name, dob FROM Patient
+WHERE dob > (SELECT AVG(dob) FROM Patient);
+
+-- Medicines priced higher than the average
+SELECT med_name, price FROM Pharmacy
+WHERE price > (SELECT AVG(price) FROM Pharmacy);
+
+-- Joining operations
+-- 1.Inner join
+SELECT p.p_id, p.name, pa.t_id, pa.t_name, pa.result, pa.date_of_testing
+FROM Patient p
+INNER JOIN Pathology pa
+ON p.p_id = pa.p_id
+ORDER BY p.p_id;
+
+-- 2.Left join
+SELECT p.p_id, p.name, pa.t_name, pa.result, pa.date_of_testing
+FROM Patient p
+LEFT JOIN Pathology pa ON p.p_id = pa.p_id
+ORDER BY p.p_id;
+
+
+-- 3.Right join
+SELECT pa.t_name, p.p_id, p.name FROM Patient p
+RIGHT JOIN Pathology pa ON p.p_id = pa.p_id
+ORDER BY p.p_id;
+
+
+-- 4.Full join
+-- MySQL doesn't have Full join function, hence using UNION
+SELECT p.p_id, p.name, p.email, pa.t_id, pa.t_name, pa.result, pa.date_of_testing FROM Patient p
+LEFT JOIN Pathology pa ON p.p_id = pa.p_id
+UNION
+SELECT p.p_id, p.name, p.email, pa.t_id, pa.t_name, pa.result, pa.date_of_testing FROM Patient p
+RIGHT JOIN Pathology pa ON p.p_id = pa.p_id
+ORDER BY p_id, t_id;
+
+-- 5. Self join
+SELECT p1.name AS patient1, p2.name AS patient2, p1.address
+FROM Patient p1
+INNER JOIN Patient p2
+ON p1.address = p2.address
+AND p1.p_id <> p2.p_id
+ORDER BY p1.address;
+
+-- Sorting operations
+-- 1.Ascending
+SELECT code_no, med_name, quantity FROM Pharmacy
+ORDER BY quantity ASC;
+
+-- OR
+SELECT code_no, med_name, price FROM Pharmacy
+ORDER BY price ASC;
+
+-- 2. Descending
+SELECT code_no, med_name, quantity FROM Pharmacy
+ORDER BY quantity DESC;
+
+-- OR
+SELECT code_no, med_name, price FROM Pharmacy
+ORDER BY price DESC;
+
+-- Views
+-- DDL commands on view
+-- 1.Create View on one table
+CREATE VIEW PatientData AS
+SELECT p_id, name, contact FROM Patient;
+DESC PatientData;
+
+-- 2.Create View on two or more tables
+CREATE VIEW PatientTests AS
+SELECT p.p_id, p.name, pa.t_name,pa.result
+FROM Patient p JOIN Pathology pa ON p.p_id = pa.p_id;
+
+-- 3.Create View on one table using WITH CHECK OPTION
+CREATE VIEW LowQuantity AS
+SELECT * FROM Pharmacy WHERE quantity <= 70
+WITH CHECK OPTION;
+
+-- Displays View name and 'With Check option' status
+SELECT TABLE_NAME, CHECK_OPTION
+FROM INFORMATION_SCHEMA.VIEWS
+WHERE TABLE_NAME = 'LowQuantity';
+
+-- 4.Alter View
+-- i.Add column in view
+CREATE OR REPLACE VIEW PatientData AS
+SELECT p_id, name, email, contact FROM Patient;
+
+-- ii. Remove column from view
+CREATE OR REPLACE VIEW PatientData AS
+SELECT p_id, name, email FROM Patient;
+
+-- 5. Drop view
+DROP VIEW lowquantity;
+
+-- 6. Rename columns/attributes of View
+CREATE OR REPLACE
+VIEW PatientData( ID, FullName, EmailID) AS
+SELECT p_id, name, email FROM Patient;
+
+-- DML commands on view
+-- 1.Display records from view
+SELECT * FROM PatientData;
+
+-- 2.Insert record in View
+INSERT INTO PatientData(ID, FullName, EmailID) VALUES ('1015', "Aarya Patil", 'aaryap@pqr.com');
+-- Value will be inserted in both, view and base/original table
+
+-- 3.Update values of view
+UPDATE PatientData
+SET EmailID = 'aarya.patil@abc.in' WHERE ID = 1015;
+
+-- 4.Delete row from view
+DELETE FROM PatientData WHERE ID = 1015;
+
+
+-- Use DESC table_name/view_name to get the output for DDL commands.
+-- Use SELECT * FROM table_name/view_name to get the output for DML commands.
