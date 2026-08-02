@@ -72,3 +72,53 @@ END %%
 DELIMITER ;
 SELECT min_payment();
 
+-- Triggers
+-- Trigger 1: Before insert
+delimiter //
+DROP TRIGGER IF EXISTS validate_amount //
+
+CREATE TRIGGER validate_amount
+BEFORE INSERT ON paytable
+FOR EACH ROW
+ BEGIN
+     IF NEW.amount <= 0 THEN
+       SIGNAL SQLSTATE '45000'
+          SET MESSAGE_TEXT ='Amount must be greater than zero';
+     END IF;
+  END;
+//
+
+-- Test Trigger 1
+delimiter ;
+INSERT INTO paytable (customer_id, customer, mode, amount, payment_date, city) VALUES( 201, "Marie Robins", "Credit Card", 100.00, '2025-11-01', "Chicago");
+-- error message will appear
+
+-- Trigger 2: After Update
+-- Create audit table
+CREATE TABLE paytable_audit (
+   audit_id INT AUTO_INCREMENT PRIMARY KEY,
+   customer_id INT, customer VARCHAR(50), old_amount DECIMAL(10,2),new_amount DECIMAL(10,2), change_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Trigger
+delimiter //
+DROP TRIGGER IF EXISTS log_payment_update //
+
+CREATE TRIGGER log_payment_update
+  AFTER UPDATE ON paytable
+  FOR EACH ROW
+  BEGIN
+     INSERT INTO paytable_audit (customer_id, customer, old_amount, new_amount, change_date)
+       VALUES (OLD.customer_id, OLD.customer, OLD.amount, NEW.amount, NOW());
+   END;
+//
+
+-- Test Trigger 2
+delimiter ;
+UPDATE paytable
+  SET amount = 350.00
+  WHERE customer_id = 103 AND customer = 'Maya Hernandez';
+
+
+
+
