@@ -8,4 +8,4 @@ This project creates the database for a polyclinic and has tables: Patient, Doct
 
 2. Transactions.sql
 
-This project creates a database that stores transaction details like customer, mode of payment, amount, etc. in table known as Paytable. It demonstrates functioning of stored procedures and stored functions.
+This project creates a database that stores transaction details like customer, mode of payment, amount, etc. in table known as Paytable. It demonstrates functioning of stored procedures, stored functions and triggers.
